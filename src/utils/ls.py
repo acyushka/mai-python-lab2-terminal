@@ -15,7 +15,6 @@ def default_ls(items: list[str]) -> list[str]:
         string = " ".join(items[i:i+k])
         strings.append(string + " \n")
 
-    strings.append("\n")
     return strings
 
 def detailed_ls(path: PathLike[str] | str, items: list[str]) -> list[str]:
