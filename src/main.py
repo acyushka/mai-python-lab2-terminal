@@ -2,6 +2,8 @@ import sys
 from pathlib import Path
 from loguru import logger
 from typer import Typer, Context
+
+from services.history_service import HistoryService
 from src.dependencies.container import Container
 from src.enums.file_mode import FileReadMode
 from src.services.linux_console import LinuxConsoleService
@@ -9,7 +11,6 @@ import click
 import typer
 from click_shell import make_click_shell
 
-from utils.log_shell import log_shell
 from utils.validators import validate_archive
 
 app = Typer(
@@ -35,7 +36,10 @@ def main(ctx: Context) -> None:
     logger.remove()
     logger.add("shell.log", format="[{time:YYYY-MM-DD HH:mm:ss}] {message}", colorize=True)
 
-    ctx.obj = Container(console_service=LinuxConsoleService())
+    ctx.obj = Container(
+        console_service=LinuxConsoleService(),
+        history_service=HistoryService(),
+    )
 
 
 @app.command()
@@ -50,6 +54,7 @@ def ls(
         container = get_container(ctx)
         result = container.console_service.ls(path, hidden, detailed)
         sys.stdout.writelines(result)
+
         logger.success("SUCCESS")
     except OSError as e:
         logger.error(f"ERROR: {str(e)}")
@@ -114,6 +119,8 @@ def cp(
     try:
         container: Container = get_container(ctx)
         container.console_service.cp(source, destination, recursive)
+
+        container.history_service.add_undo("cp", str(source), str(destination), r=recursive)
         logger.success("SUCCESS")
     except OSError as e:
         logger.error(f"ERROR: {str(e)}")
@@ -138,6 +145,8 @@ def mv(
     try:
         container: Container = get_container(ctx)
         container.console_service.mv(source, destination)
+
+        container.history_service.add_undo("mv", str(source), str(destination))
         logger.success("SUCCESS")
     except OSError as e:
         logger.error(f"ERROR: {str(e)}")
@@ -163,7 +172,10 @@ def rm(
                 typer.echo("Операция отменена")
                 return
 
+        backup_path = container.history_service.backup(path)
         container.console_service.rm(path, recursive)
+
+        container.history_service.add_undo("rm", str(path), backup=str(backup_path), r=recursive)
         logger.success("SUCCESS")
     except OSError as e:
         logger.error(f"ERROR: {str(e)}")
@@ -188,6 +200,7 @@ def zip(
         logger.error(f"ERROR: {str(e)}")
         typer.echo(str(e), err=True)
 
+
 @app.command()
 def unzip(
         ctx: Context,
@@ -203,6 +216,7 @@ def unzip(
         logger.error(f"ERROR: {str(e)}")
         typer.echo(str(e), err=True)
 
+
 @app.command()
 def tar(
         ctx: Context,
@@ -213,11 +227,12 @@ def tar(
 
     try:
         container = get_container(ctx)
-        container.console_service.archive("tar" ,folder, filename)
+        container.console_service.archive("tar", folder, filename)
         logger.success("SUCCESS")
     except OSError as e:
         logger.error(f"ERROR: {str(e)}")
         typer.echo(str(e), err=True)
+
 
 @app.command()
 def untar(
@@ -234,16 +249,77 @@ def untar(
         logger.error(f"ERROR: {str(e)}")
         typer.echo(str(e), err=True)
 
+
+@app.command()
+def history(
+        ctx: Context,
+        length: int = typer.Argument(None, help="Вывести определенное последних количество команд"),
+):
+    if length is None:
+        length = 0
+    if length < 0:
+        logger.error("ERROR: history: введено отрицательное число")
+        typer.echo("history: отрицательные числа вводить нельзя")
+        return
+
+    try:
+        container: Container = get_container(ctx)
+        commands = container.history_service.get(length)
+        for command in commands[::-1]:
+            sys.stdout.write(command)
+        logger.success("SUCCESS")
+    except Exception as e:
+        logger.error(f"ERROR: {str(e)}")
+        typer.echo(str(e), err=True)
+
+
+@app.command()
+def undo(ctx: Context) -> None:
+    container = get_container(ctx)
+    last_command = container.history_service.get_undo()
+    if last_command is None:
+        logger.error("ERROR: undo: нет команд для отмены")
+        typer.echo("undo: нет команд для отмены")
+        return
+
+    try:
+        match last_command["type"]:
+            case "mv":
+                container.console_service.mv(last_command["destination"], last_command["source"])
+            case "rm":
+                container.console_service.mv(last_command["backup_path"], last_command["source"])
+            case "cp":
+                container.console_service.rm(last_command["destination"], last_command["recursive"])
+
+        container.history_service.add(f"undo {last_command["type"]}")
+        logger.success("SUCCESS")
+    except Exception as e:
+        logger.error(f"ERROR: {str(e)}")
+        typer.echo(str(e), err=True)
+
+
 @app.callback(invoke_without_command=True)
 def base(ctx: typer.Context):
     logger.remove()
     logger.add("shell.log", format="[{time:YYYY-MM-DD HH:mm:ss}] {message}", colorize=True)
 
-    ctx.obj = Container(console_service=LinuxConsoleService())
+    ctx.obj = Container(
+        console_service=LinuxConsoleService(),
+        history_service=HistoryService(),
+    )
 
     if ctx.invoked_subcommand is None:
-        shell = make_click_shell(ctx, prompt=f'{ctx.obj.console_service.current_path} ', intro='...Терминал запущен...')
-        shell.precmd = log_shell
+        shell = make_click_shell(ctx, prompt=f"{ctx.obj.console_service.current_path} ", intro="...Терминал запущен...")
+
+        container: Container = ctx.obj
+
+        def log_and_history(line):
+            if line and line.strip():
+                logger.info(line)
+                container.history_service.add(line.strip())
+            return line
+
+        shell.precmd = log_and_history
         shell.cmdloop()
         typer.Exit(0)
 

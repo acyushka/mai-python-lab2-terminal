@@ -1,0 +1,38 @@
+1 <built-in method strip of str object at 0x70301915de00>
+2 <built-in method strip of str object at 0x70301866f640>
+3 <built-in method strip of str object at 0x70301915de00>
+4 ls
+5 undo
+6 ls
+7 ls -a
+8 history
+9 history 10
+10 exit
+11 history
+12 history 10
+13 history 0
+14 history 1
+15 ls
+16 ls -al
+17 rm .test
+18 ls -al
+19 undo
+20 undo rm
+21 mv .test src/
+22 undo
+23 undo mv
+24 exit
+25 ls -al
+26 exit
+27 history
+28 history 1
+29 history 10
+30 history 10
+31 exit
+32 history 1
+33 history 2
+34 history 10
+35 exit
+36 history 10
+37 history 1
+38 exit
