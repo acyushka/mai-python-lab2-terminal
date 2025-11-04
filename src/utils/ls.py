@@ -13,10 +13,11 @@ def default_ls(items: list[str]) -> list[str]:
     strings = []
 
     for i in range(0, len(items), k):
-        string = "".join(f"{item:<{column_width}}" for item in items[i:i+k])
+        string = "".join(f"{item:<{column_width}}" for item in items[i:i + k])
         strings.append(string + "\n")
 
     return strings
+
 
 def detailed_ls(path: PathLike[str] | str, items: list[str]) -> list[str]:
     strings = []

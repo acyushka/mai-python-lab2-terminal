@@ -4,7 +4,7 @@ from loguru import logger
 from typer import Typer, Context
 
 from services.history_service import HistoryService
-from src.dependencies.container import Container
+from src.dependencies.container import Container, get_container
 from src.enums.file_mode import FileReadMode
 from src.services.linux_console import LinuxConsoleService
 import click
@@ -22,13 +22,6 @@ app = Typer(
 @click.pass_context
 def my_app(ctx):
     pass
-
-
-def get_container(ctx: Context) -> Container:
-    container = ctx.obj
-    if not isinstance(container, Container):
-        raise RuntimeError("DI Container is not initialized")
-    return container
 
 
 @app.callback()
@@ -311,7 +304,7 @@ def grep(
         pattern: str = typer.Argument(None, help="Паттерн для поиска"),
         path: Path = typer.Argument(None, help="Путь, по которому ищем паттерн"),
         recursive: bool = typer.Option(False, "-r", help="Флаг для рекурсивного поиска по каталогам"),
-        ignore: bool = typer.Option(False,"-i", help="Флаг для игнорирования регистра"),
+        ignore: bool = typer.Option(False, "-i", help="Флаг для игнорирования регистра"),
 ):
     if pattern is None or path is None:
         logger.error("ERROR: grep: не указаны необходимые аргументы")

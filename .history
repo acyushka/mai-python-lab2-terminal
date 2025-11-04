@@ -28,3 +28,7 @@
 28 exit
 29 cd
 30 exit
+31 ls
+32 ls -a
+33 ls -al
+34 exit
