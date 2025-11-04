@@ -291,7 +291,31 @@ def undo(ctx: Context) -> None:
             case "cp":
                 container.console_service.rm(last_command["destination"], last_command["recursive"])
 
-        container.history_service.add(f"undo {last_command["type"]}")
+        logger.success("SUCCESS")
+    except Exception as e:
+        logger.error(f"ERROR: {str(e)}")
+        typer.echo(str(e), err=True)
+
+
+@app.command()
+def grep(
+        ctx: Context,
+        pattern: str = typer.Argument(None, help="Паттерн для поиска"),
+        path: Path = typer.Argument(None, help="Путь, по которому ищем паттерн"),
+        recursive: bool = typer.Option(False, "-r", help="Флаг для рекурсивного поиска по каталогам"),
+        ignore: bool = typer.Option(False,"-i", help="Флаг для игнорирования регистра"),
+):
+    if pattern is None or path is None:
+        logger.error("ERROR: grep: не указаны необходимые аргументы")
+        typer.echo("grep: необходимо указать паттерн и путь")
+        return
+
+    try:
+        container: Container = get_container(ctx)
+        result = container.console_service.grep(pattern, path, recursive, ignore)
+        for string in result:
+            sys.stdout.write(string)
+
         logger.success("SUCCESS")
     except Exception as e:
         logger.error(f"ERROR: {str(e)}")

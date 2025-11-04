@@ -107,3 +107,34 @@
 [2025-11-04 14:22:18] history 1
 [2025-11-04 14:22:18] SUCCESS
 [2025-11-04 14:22:23] exit
+[2025-11-04 14:46:51] undo
+[2025-11-04 14:46:51] ERROR: undo: нет команд для отмены
+[2025-11-04 14:47:24] exit
+[2025-11-04 15:50:45] ls
+[2025-11-04 15:50:45] SUCCESS
+[2025-11-04 15:51:01] grep SUCCESS shell.log
+[2025-11-04 15:51:01] SUCCESS
+[2025-11-04 15:53:06] ls
+[2025-11-04 15:53:06] SUCCESS
+[2025-11-04 15:53:31] grep grep src/
+[2025-11-04 15:53:31] ERROR: grep: 'src': Это каталог
+[2025-11-04 15:53:35] grep grep src/ -r
+[2025-11-04 15:53:35] ERROR: 'src/main.py' is not in the subpath of '/home/reystep/PycharmProjects/mai-python-lab2-terminal'
+[2025-11-04 15:56:20] grep grep src/ -ri
+[2025-11-04 15:56:20] ERROR: 'src/main.py' is not in the subpath of '/home/reystep/PycharmProjects/mai-python-lab2-terminal'
+[2025-11-04 15:56:43] exit
+[2025-11-04 15:58:33] grep grep src/ -ri
+[2025-11-04 15:58:33] SUCCESS
+[2025-11-04 16:09:26] exit
+[2025-11-04 16:09:31] grep grep src/ -ri
+[2025-11-04 16:09:31] SUCCESS
+[2025-11-04 16:10:18] exit
+[2025-11-04 16:10:21] grep grep src/ -ri
+[2025-11-04 16:10:21] SUCCESS
+[2025-11-04 16:11:07] exit
+[2025-11-04 16:28:20] exit
+[2025-11-04 16:29:10] ls -al
+[2025-11-04 16:29:10] SUCCESS
+[2025-11-04 16:29:58] cp test1 tests/
+[2025-11-04 16:29:58] SUCCESS
+[2025-11-04 16:30:15] exit

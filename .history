@@ -36,3 +36,22 @@
 36 history 10
 37 history 1
 38 exit
+39 undo
+40 exit
+41 ls
+42 grep SUCCESS shell.log
+43 ls
+44 grep grep src/
+45 grep grep src/ -r
+46 grep grep src/ -ri
+47 exit
+48 grep grep src/ -ri
+49 exit
+50 grep grep src/ -ri
+51 exit
+52 grep grep src/ -ri
+53 exit
+54 exit
+55 ls -al
+56 cp test1 tests/
+57 exit

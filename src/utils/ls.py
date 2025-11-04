@@ -30,5 +30,3 @@ def detailed_ls(path: PathLike[str] | str, items: list[str]) -> list[str]:
         strings.append(f"{permissions} {size:>8} {time} {filename} \n")
 
     return strings
-
-

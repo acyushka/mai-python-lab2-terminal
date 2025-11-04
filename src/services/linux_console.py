@@ -1,9 +1,11 @@
 import os
+import re
 from os import PathLike
 import shutil
 from pathlib import Path
 from typing import Literal
 
+from enums.constants import BINARY
 from src.enums.file_mode import FileReadMode
 from src.utils.ls import default_ls, detailed_ls
 
@@ -114,7 +116,7 @@ class LinuxConsoleService:
             else:
                 raise ValueError(f"cp: невозможно скопировать '{src}'; Неподдерживаемый тип файла")
         except PermissionError:
-            raise PermissionError(f"cp: Отказано в доступе")
+            raise PermissionError("cp: Отказано в доступе")
 
     def mv(self, src: PathLike[str] | str, dst: PathLike[str] | str) -> None:
         src_path = Path(src)
@@ -168,8 +170,7 @@ class LinuxConsoleService:
         except Exception as e:
             raise OSError(f"Ошибка: {e}")
 
-
-    def unpack_archive(self, format: str,  name: PathLike[str] | str) -> None:
+    def unpack_archive(self, format: str, name: PathLike[str] | str) -> None:
         filename = Path(name)
 
         if not filename.exists():
@@ -187,3 +188,49 @@ class LinuxConsoleService:
             raise OSError(f"{format}: неправильный или сломанный формат архива")
         except Exception as e:
             raise OSError(f"Ошибка: {e}")
+
+    def grep(self, pattern: str, path: PathLike[str] | str, r: bool, i: bool) -> list[str]:
+        path = Path(path)
+        ignore_flag = 0
+        if i: ignore_flag = re.IGNORECASE
+
+        if not path.exists():
+            raise FileNotFoundError(f"grep: '{path}': Файл не существует")
+
+        try:
+            pattern = re.compile(pattern, ignore_flag)
+        except:
+            raise ValueError("grep: некорректный формат паттерна")
+
+        result = []
+
+        if path.is_file():
+            with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                for i, string in enumerate(f, 1):
+                    if pattern.search(string):
+                        result.append(f"{path}:{i}:{string}")
+
+        elif path.is_dir():
+            if r:
+                for dirpath, _, filenames in os.walk(path):
+                    for file in filenames:
+                        file_path = Path(dirpath) / file
+
+                        if file_path.suffix in BINARY:
+                            result.append(f"grep: {file_path.relative_to(path)}: двоичный файл совпадает\n")
+                            continue
+
+                        try:
+                            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                                for i, string in enumerate(f, 1):
+                                    if pattern.search(string):
+                                        relative_path = file_path.relative_to(path)
+                                        result.append(f"{relative_path}:{i}:{string}")
+                        except OSError:
+                            continue
+            else:
+                raise IsADirectoryError(f"grep: '{path}': Это каталог")
+        else:
+            raise ValueError(f"grep: '{path}': Не является файлом или каталогом")
+
+        return result
