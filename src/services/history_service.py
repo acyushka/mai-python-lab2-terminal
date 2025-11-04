@@ -30,7 +30,7 @@ class HistoryService:
 
         strings = strings[::-1]
 
-        if length > len(strings):
+        if length > len(strings) or length==-1:
             return strings
         return strings[:length]
 

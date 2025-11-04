@@ -5,7 +5,7 @@ distlib==0.4.0
 filelock==3.20.0
 identify==2.6.15
 iniconfig==2.3.0
--e git+https://github.com/acyushka/mai-python-lab2-terminal.git@a520b426c196b1fe2f0b488bc051991a370ecbaa#egg=labs
+-e git+https://github.com/acyushka/mai-python-lab2-terminal.git@2c700fff780f097f83090904d368d5fee2c22abc#egg=labs
 loguru==0.7.3
 markdown-it-py==4.0.0
 mdurl==0.1.2
@@ -14,6 +14,7 @@ packaging==25.0
 platformdirs==4.5.0
 pluggy==1.6.0
 pre_commit==4.3.0
+pyfakefs==5.10.1
 Pygments==2.19.2
 pytest==8.4.2
 PyYAML==6.0.3

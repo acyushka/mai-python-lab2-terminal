@@ -263,12 +263,12 @@ def history(
         ctx: Context,
         length: int = typer.Argument(None, help="Вывести определенное последних количество команд"),
 ):
-    if length is None:
-        length = 0
     if length < 0:
         logger.error("ERROR: history: введено отрицательное число")
         typer.echo("history: отрицательные числа вводить нельзя")
         return
+    if length is None:
+        length = -1
 
     try:
         container: Container = get_container(ctx)

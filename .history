@@ -24,3 +24,7 @@
 24 typer
 25 exit
 26 exit
+27 ls shell.log
+28 exit
+29 cd
+30 exit

@@ -22,11 +22,9 @@ class LinuxConsoleService:
             path = Path(path)
 
         if not path.exists():
-            # log
-            raise FileNotFoundError(path)
+            raise FileNotFoundError(f"ls: '{path}': Каталог не существует")
         if not path.is_dir():
-            # log
-            raise NotADirectoryError(path)
+            raise NotADirectoryError(f"grep: '{path}': Это не каталог")
 
         items = [item.name for item in path.iterdir()]
         if not hidden:
@@ -37,7 +35,6 @@ class LinuxConsoleService:
             result = detailed_ls(path, items)
         else:
             result = default_ls(items)
-        # log
         return result
 
     def cd(self, path: PathLike[str] | str) -> None:
@@ -59,7 +56,7 @@ class LinuxConsoleService:
                     path = (self.current_path / path).resolve()
 
         if not path.exists():
-            raise FileNotFoundError(path)
+            raise FileNotFoundError(f"cd: '{path}': Каталог не существует")
         if not path.is_dir():
             raise NotADirectoryError(f"cd:'{path}'; Это не каталог")
 
@@ -76,11 +73,11 @@ class LinuxConsoleService:
     ) -> str | bytes:
         path = Path(file)
         if not path.exists(follow_symlinks=True):
-            raise
+            raise FileNotFoundError(f"cat: '{path}': Файл не существует")
         if not path.is_file():
-            raise
+            raise IsADirectoryError(f"cat: '{path}': Это не файл")
         if not os.access(path, os.R_OK):
-            raise PermissionError(f"cat: {file}; Отказано в доступе")
+            raise PermissionError(f"cat: {path}; Отказано в доступе")
 
         try:
             match mode:
@@ -101,7 +98,7 @@ class LinuxConsoleService:
         dst_path = Path(dst)
 
         if not src_path.exists():
-            raise FileNotFoundError(src_path)
+            raise FileNotFoundError(f"cp: '{src}': Файл не существует")
         if src_path.is_dir() and dst_path.exists() and dst_path.is_file():
             raise IsADirectoryError("cp: невозможно перезаписать некаталоговый объект каталогом")
 
@@ -123,7 +120,7 @@ class LinuxConsoleService:
         dst_path = Path(dst)
 
         if not src_path.exists():
-            raise FileNotFoundError(src_path)
+            raise FileNotFoundError(f"mv: '{src}': Файл не существует")
 
         try:
             shutil.move(src_path, dst_path)
@@ -133,7 +130,7 @@ class LinuxConsoleService:
     def rm(self, path: PathLike[str] | str, recursive: bool) -> None:
         path = Path(path)
         if not path.exists():
-            raise FileNotFoundError(path)
+            raise FileNotFoundError(f"mv: '{path}': Файл не существует")
         if str(path) in ("..", "/") or path.resolve() == Path("/"):
             raise PermissionError(f"rm: невозможно удалить '{path}'; Отказано в доступе")
         try:
@@ -180,11 +177,9 @@ class LinuxConsoleService:
 
         try:
             shutil.unpack_archive(filename, self.current_path)
-        except shutil.ReadError:
-            raise OSError(f"{format}: Файл поврежден")
         except PermissionError:
             raise PermissionError(f"{format}: Отказано в доступе")
-        except ValueError:
+        except (ValueError, shutil.ReadError):
             raise OSError(f"{format}: неправильный или сломанный формат архива")
         except Exception as e:
             raise OSError(f"Ошибка: {e}")
