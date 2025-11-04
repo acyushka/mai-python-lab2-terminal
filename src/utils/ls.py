@@ -9,11 +9,12 @@ def default_ls(items: list[str]) -> list[str]:
         return ["\n"]
 
     k = (len(items) // 6) + 1
+    column_width = max(len(item) for item in items)
     strings = []
 
     for i in range(0, len(items), k):
-        string = " ".join(items[i:i+k])
-        strings.append(string + " \n")
+        string = "".join(f"{item:<{column_width}}" for item in items[i:i+k])
+        strings.append(string + "\n")
 
     return strings
 

@@ -120,7 +120,11 @@ def cp(
         container: Container = get_container(ctx)
         container.console_service.cp(source, destination, recursive)
 
-        container.history_service.add_undo("cp", str(source), str(destination), r=recursive)
+        true_dst = destination
+        if destination.is_dir():
+            true_dst = destination / source.name
+
+        container.history_service.add_undo("cp", str(source), str(true_dst), r=recursive)
         logger.success("SUCCESS")
     except OSError as e:
         logger.error(f"ERROR: {str(e)}")
@@ -146,7 +150,11 @@ def mv(
         container: Container = get_container(ctx)
         container.console_service.mv(source, destination)
 
-        container.history_service.add_undo("mv", str(source), str(destination))
+        true_dst = destination
+        if destination.is_dir():
+            true_dst = destination / source.name
+
+        container.history_service.add_undo("mv", str(source), str(true_dst))
         logger.success("SUCCESS")
     except OSError as e:
         logger.error(f"ERROR: {str(e)}")

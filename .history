@@ -55,3 +55,34 @@
 55 ls -al
 56 cp test1 tests/
 57 exit
+58 ls -al
+59 undo
+60 cp test1 tests/
+61 cp test1 tests/
+62 undo
+63 exit
+64 cp test1 tests/
+65 ls tests
+66 undo
+67 cp test1 tests/
+68 rm tests/test1
+69 exit
+70 ls -al
+71 mv test1 tests/
+72 undo
+73 exit
+74 ls -a
+75 exit
+76 ls -a
+77 ls
+78 exit
+79 ls
+80 ls -al
+81 ls -a
+82 ls
+83 exit
+84 ls
+85 ls -a
+86 exit
+87 ls -a
+88 exit
