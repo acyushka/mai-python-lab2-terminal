@@ -351,7 +351,12 @@ def base(ctx: typer.Context):
                 container.history_service.add(line.strip())
             return line
 
+        def update_prompt(stop, line):
+            shell.prompt = f"{container.console_service.current_path} "
+            return stop
+
         shell.precmd = log_and_history
+        shell.postcmd = update_prompt
         shell.cmdloop()
         typer.Exit(0)
 

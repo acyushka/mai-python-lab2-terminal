@@ -3,10 +3,15 @@ from pathlib import Path
 
 
 class HistoryService:
-    def __init__(self, file: Path = Path(".history")):
+    def __init__(self):
+        project_root = Path(__file__).parent.parent.parent
+
         self.stack = []
-        self.history_file = file
-        self.trash_dir = Path(".trash")
+        self.history_file = project_root / ".history"
+        self.trash_dir = project_root / ".trash"
+
+        self.history_file.touch(exist_ok=True)
+        self.trash_dir.mkdir(parents=True, exist_ok=True)
 
     def add(self, command: str) -> None:
         with open(self.history_file, "r", encoding="utf-8") as f:

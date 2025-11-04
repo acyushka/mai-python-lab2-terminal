@@ -1,88 +1,26 @@
-1 <built-in method strip of str object at 0x70301915de00>
-2 <built-in method strip of str object at 0x70301866f640>
-3 <built-in method strip of str object at 0x70301915de00>
-4 ls
-5 undo
+1 ls
+2 cd ..
+3 cd ..
+4 cd ..
+5 cd ..
 6 ls
-7 ls -a
-8 history
-9 history 10
+7 exit
+8 exit
+9 cd home
 10 exit
-11 history
-12 history 10
-13 history 0
-14 history 1
+11 ls
+12 cd reystep
+13 cd PycharmProjects
+14 cd mai
 15 ls
-16 ls -al
-17 rm .test
-18 ls -al
-19 undo
-20 undo rm
-21 mv .test src/
-22 undo
-23 undo mv
-24 exit
-25 ls -al
+16 cd mai-python-lab2-terminal
+17 ls
+18 exit
+19 exit
+20 dsdsa
+21 dsd
+22 c
+23 x
+24 typer
+25 exit
 26 exit
-27 history
-28 history 1
-29 history 10
-30 history 10
-31 exit
-32 history 1
-33 history 2
-34 history 10
-35 exit
-36 history 10
-37 history 1
-38 exit
-39 undo
-40 exit
-41 ls
-42 grep SUCCESS shell.log
-43 ls
-44 grep grep src/
-45 grep grep src/ -r
-46 grep grep src/ -ri
-47 exit
-48 grep grep src/ -ri
-49 exit
-50 grep grep src/ -ri
-51 exit
-52 grep grep src/ -ri
-53 exit
-54 exit
-55 ls -al
-56 cp test1 tests/
-57 exit
-58 ls -al
-59 undo
-60 cp test1 tests/
-61 cp test1 tests/
-62 undo
-63 exit
-64 cp test1 tests/
-65 ls tests
-66 undo
-67 cp test1 tests/
-68 rm tests/test1
-69 exit
-70 ls -al
-71 mv test1 tests/
-72 undo
-73 exit
-74 ls -a
-75 exit
-76 ls -a
-77 ls
-78 exit
-79 ls
-80 ls -al
-81 ls -a
-82 ls
-83 exit
-84 ls
-85 ls -a
-86 exit
-87 ls -a
-88 exit
