@@ -39,7 +39,7 @@ def test_success_multiple(linux_console, fake_system):
     fake_system.create_file("multi.txt", contents="TEST\nTEST\n")
     result = linux_console.grep("TEST", "multi.txt", r=False, i=False)
     assert len(result) == 2
-    
+
 def test_e_notfound(linux_console):
     with pytest.raises(FileNotFoundError):
         linux_console.grep("pattern", "nononono.txt", r=False, i=False)
@@ -53,4 +53,3 @@ def test_e_dir_without_recursive(linux_console):
 def test_e_invalid_pattern(linux_console):
     with pytest.raises(ValueError):
         linux_console.grep(")t", "/home/test/testD.txt", r=False, i=False)
-

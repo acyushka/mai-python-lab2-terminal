@@ -12,6 +12,7 @@ class Container:
 
 
 def get_container(ctx: Context) -> Container:
+    """Взятие контейнера из контекста Тайпера. Функция вынесена из мейна"""
     container = ctx.obj
     if not isinstance(container, Container):
         raise RuntimeError("DI Container is not initialized")

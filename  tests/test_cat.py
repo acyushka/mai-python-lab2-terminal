@@ -44,6 +44,3 @@ def test_e_dir(linux_console):
 def test_e_not_permission(linux_console, fake_system):
     with pytest.raises(PermissionError):
         linux_console.cat("no_access.txt")
-
-
-

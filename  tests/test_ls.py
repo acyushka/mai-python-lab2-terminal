@@ -7,7 +7,7 @@ def test_success_without_hidden(linux_console):
     res = " ".join(linux_console.ls(Path("/home/test/"), hidden=False, detailed=False))
     assert "data1" in res
     assert "data2" in res
-    assert not ".data3" in res
+    assert ".data3" not in res
 
 
 def test_success_hidden(linux_console):
@@ -30,4 +30,3 @@ def test_e_notfound(linux_console):
 def test_e_dir(linux_console):
     with pytest.raises(NotADirectoryError):
         linux_console.ls(Path("/home/test/testD.txt"), hidden=True, detailed=False)
-

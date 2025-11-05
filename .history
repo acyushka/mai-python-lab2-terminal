@@ -32,3 +32,12 @@
 32 ls -a
 33 ls -al
 34 exit
+35 cd ..
+36 cd ..
+37 cd ..
+38 cd ..
+39 cd ..
+40 cd ..
+41 ls
+42 ls -al
+43 exit

@@ -39,4 +39,3 @@ def test_e_without_recursive(linux_console):
 def test_e_no_access(linux_console):
     with pytest.raises(PermissionError):
         linux_console.cp("no_access.txt", "copy.txt", False)
-

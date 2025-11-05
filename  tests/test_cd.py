@@ -40,5 +40,3 @@ def test_e_notfound(linux_console):
 def test_e_not_dir(linux_console):
     with pytest.raises(NotADirectoryError):
         linux_console.cd("/home/test/testD.txt")
-
-

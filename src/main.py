@@ -21,11 +21,13 @@ app = Typer(
 @click.group()
 @click.pass_context
 def my_app(ctx):
+    """Костыль для обмана typer, чтобы запустить интерактивную консоль через click-shell. Пока не обращаем внимание"""
     pass
 
 
 @app.callback()
 def main(ctx: Context) -> None:
+    """Точка входа в приложение:Создание кастомного логгера. Занесение в контекст контейнера с сервисами."""
     logger.remove()
     logger.add("shell.log", format="[{time:YYYY-MM-DD HH:mm:ss}] {message}", colorize=True)
 
@@ -43,6 +45,7 @@ def ls(
         hidden: bool = typer.Option(False, "-a", help="Флаг для отображения скрытых файлов"),
         detailed: bool = typer.Option(False, "-l", help="Флаг для более подробного и структурированного вывода команды")
 ) -> None:
+    """Команда ls. Выводит список файлов в текущей директории"""
     try:
         container = get_container(ctx)
         result = container.console_service.ls(path, hidden, detailed)
@@ -58,7 +61,8 @@ def ls(
 def cd(
         ctx: Context,
         path: Path = typer.Argument(None, help="Переместиться в указанный каталог")
-):
+) -> None:
+    """Команда cd. Переходит в указанную директорию"""
     if path in (None, "~"):
         path = Path.home()
 
@@ -78,7 +82,8 @@ def cat(
             ..., exists=False, readable=False, help="Вывести содержимое файла"
         ),
         mode: bool = typer.Option(False, "-b", "--bytes", help="Прочитать файл как слайс байтов")
-):
+) -> None:
+    """Команда cat. Выводит содержимое указанного файла"""
     try:
         container: Container = get_container(ctx)
         mode = FileReadMode.bytes if mode else FileReadMode.string
@@ -100,6 +105,7 @@ def cp(
         destination: Path = typer.Argument(None, help="Путь назначения"),
         recursive: bool = typer.Option(False, "-r", "-R", help="Необходимый для рекурсивного копирования флаг"),
 ) -> None:
+    """Команда cp. Копирует указанный файл/каталог и переносит копию по указанному пути"""
     if source is None:
         logger.error("ERROR: cp: пропущен операнд, задающий файл")
         typer.echo("cp: пропущен операнд, задающий файл")
@@ -130,6 +136,7 @@ def mv(
         source: Path = typer.Argument(None, help="Перемещаемый источник"),
         destination: Path = typer.Argument(None, help="Путь назначения"),
 ) -> None:
+    """Команда mv. Перемещает выбранный файл/каталог по указанному пути"""
     if source is None:
         logger.error("ERROR: mv: пропущен операнд, задающий файл")
         typer.echo("mv: пропущен операнд, задающий файл")
@@ -160,6 +167,7 @@ def rm(
         path: Path = typer.Argument(None, help="Удалить папки или файлы из каталога"),
         recursive: bool = typer.Option(False, "-r", "-R", help="Необходимый флаг для удаления папок (рекурсивно)"),
 ) -> None:
+    """Команда rm. Удаляет указанный файл/каталог"""
     if path is None:
         logger.error("ERROR: rm: пропущен операнд")
         typer.echo("rm: пропущен операнд")
@@ -190,7 +198,8 @@ def zip(
         ctx: Context,
         folder: Path = typer.Argument(None, help="Каталог, который хотите заархивировать"),
         filename: Path = typer.Argument(None, help="Имя архивируемого каталога"),
-):
+) -> None:
+    """Команда zip. Архивирует каталог в формате zip. Валидация параметров через функцию в src/utils/validators.py"""
     validate_archive("zip", filename, folder)
 
     try:
@@ -206,7 +215,8 @@ def zip(
 def unzip(
         ctx: Context,
         filename: Path = typer.Argument(None, help="Имя zip-архива, который хотите разархивировать"),
-):
+) -> None:
+    """Команда unzip. Распаковывает каталог формата zip. Валидация параметров через функцию в src/utils/validators.py"""
     validate_archive("zip", filename, "pass")
 
     try:
@@ -223,7 +233,8 @@ def tar(
         ctx: Context,
         folder: Path = typer.Argument(None, help="Каталог, который хотите заархивировать"),
         filename: Path = typer.Argument(None, help="Имя архивируемого каталога"),
-):
+) -> None:
+    """Команда tar. Архивирует каталог в формате tar. Валидация параметров через функцию в src/utils/validators.py"""
     validate_archive("tar", filename, folder)
 
     try:
@@ -239,7 +250,8 @@ def tar(
 def untar(
         ctx: Context,
         filename: Path = typer.Argument(None, help="Имя tar-архива, который хотите разархивировать"),
-):
+) -> None:
+    """Команда untar. Распаковывает каталог формата tar. Валидация параметров через функцию в src/utils/validators.py"""
     validate_archive("tar", filename, "pass")
 
     try:
@@ -254,8 +266,9 @@ def untar(
 @app.command()
 def history(
         ctx: Context,
-        length: int = typer.Argument(None, help="Вывести определенное последних количество команд"),
-):
+        length: int = typer.Argument(None, help="Вывести определенное количество последних команд"),
+) -> None:
+    """Команда history. Выводит команды, которые вводил пользователь, с конца. Данные хранятся в .history в корне проекта"""
     if length < 0:
         logger.error("ERROR: history: введено отрицательное число")
         typer.echo("history: отрицательные числа вводить нельзя")
@@ -276,6 +289,7 @@ def history(
 
 @app.command()
 def undo(ctx: Context) -> None:
+    """Команда undo. Отменяет последнюю совершенную команду cp, mv или rm. В случае rm есть папка .trash в корне проекта для бэкапа"""
     container = get_container(ctx)
     last_command = container.history_service.get_undo()
     if last_command is None:
@@ -305,7 +319,8 @@ def grep(
         path: Path = typer.Argument(None, help="Путь, по которому ищем паттерн"),
         recursive: bool = typer.Option(False, "-r", help="Флаг для рекурсивного поиска по каталогам"),
         ignore: bool = typer.Option(False, "-i", help="Флаг для игнорирования регистра"),
-):
+) -> None:
+    """Команда grep. Выводит все строки файла(-ов) указанного пути, где какая-то часть удовлетворяет введенному паттерну"""
     if pattern is None or path is None:
         logger.error("ERROR: grep: не указаны необходимые аргументы")
         typer.echo("grep: необходимо указать паттерн и путь")
@@ -324,7 +339,11 @@ def grep(
 
 
 @app.callback(invoke_without_command=True)
-def base(ctx: typer.Context):
+def base(ctx: typer.Context) -> None:
+    """
+        Функция выполняет обман модуля typer и выводит интерактивную консоль с помощью либы click-shell.
+        Благодаря этому команды можно вводить бесконечно и без python -m src.main (в случае использования обычного typer).
+    """
     logger.remove()
     logger.add("shell.log", format="[{time:YYYY-MM-DD HH:mm:ss}] {message}", colorize=True)
 
@@ -339,12 +358,21 @@ def base(ctx: typer.Context):
         container: Container = ctx.obj
 
         def log_and_history(line):
+            """
+            Функция логирования и занесения в историю чистого ввода пользователя.
+            Некий мидлвар, который выполняется при срабатывании precmd(при вводе пользователя).
+            """
             if line and line.strip():
                 logger.info(line)
                 container.history_service.add(line.strip())
             return line
 
         def update_prompt(stop, line):
+            """
+            Динамическое обновление текущего каталога в интерактивной консоли.
+            Опять мидлвар, выполняется уже при срабатывании postcmd(при завершении ввода пользователя).
+            Берет текущий путь из сервиса Linux, где вся бизнес-логика.
+            """
             shell.prompt = f"{container.console_service.current_path} "
             return stop
 

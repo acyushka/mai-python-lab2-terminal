@@ -13,9 +13,13 @@ from src.utils.ls import default_ls, detailed_ls
 class LinuxConsoleService:
     def __init__(self):
         self.current_path = Path.cwd()
-        pass
 
     def ls(self, path: PathLike[str] | str, hidden: bool, detailed: bool) -> list[str]:
+        """
+        Обрабатываем путь. Перебираем в список файлы через iterdir. Убираем если нет флага -а скрытые.
+        Если нет флага -l, выполняем функцию обычного вывода. Если есть, то детализированного.
+        Эти обе функции находятся в src/utils/ls.py
+        """
         if path is None:
             path = self.current_path
         else:
@@ -38,6 +42,10 @@ class LinuxConsoleService:
         return result
 
     def cd(self, path: PathLike[str] | str) -> None:
+        """
+        Обрабатываем по-умному путь. В последнем кейсе, если не абсолютный, то пытаемся решить проблему.
+        Пытаемся переместиться через chdir из os. Обновляем current_path сервиса.
+        """
         match path:
             case "/":
                 path = Path("/")
@@ -60,17 +68,21 @@ class LinuxConsoleService:
         if not path.is_dir():
             raise NotADirectoryError(f"cd:'{path}'; Это не каталог")
 
-        self.current_path = path
         try:
             os.chdir(path)
         except Exception as e:
             raise OSError(f"Ошибка: {e}")
+        self.current_path = path
 
     def cat(
             self,
             file: PathLike[str] | str,
             mode: Literal[FileReadMode.string, FileReadMode.bytes] = FileReadMode.string,
     ) -> str | bytes:
+        """
+        Обрабатываем путь к файлу и разрешение чтения.
+        Смотрим, есть ли флаг -b и выполняем соотвественные кейсы с чтением.
+        """
         path = Path(file)
         if not path.exists(follow_symlinks=True):
             raise FileNotFoundError(f"cat: '{path}': Файл не существует")
@@ -93,7 +105,11 @@ class LinuxConsoleService:
             src: PathLike[str] | str,
             dst: PathLike[str] | str,
             recursive: bool,
-    ):
+    ) -> None:
+        """
+        Обрабатываем путь источника. Если файл то выполняем copy2 от shutil(как в настоящем линуксе).
+        Если папка и есть флаг нужный: copytree тоже от shutil.
+        """
         src_path = Path(src)
         dst_path = Path(dst)
 
@@ -116,6 +132,7 @@ class LinuxConsoleService:
             raise PermissionError("cp: Отказано в доступе")
 
     def mv(self, src: PathLike[str] | str, dst: PathLike[str] | str) -> None:
+        """Обработка пути источника. И выполнение перемещения с помощью shutil"""
         src_path = Path(src)
         dst_path = Path(dst)
 
@@ -128,6 +145,7 @@ class LinuxConsoleService:
             raise PermissionError("mv: Отказано в доступе")
 
     def rm(self, path: PathLike[str] | str, recursive: bool) -> None:
+        """Обрабатотка пути. Remove от os, если просто файл. Иначе удаление через rmtree от shutil(если флаг стоит)"""
         path = Path(path)
         if not path.exists():
             raise FileNotFoundError(f"mv: '{path}': Файл не существует")
@@ -149,6 +167,11 @@ class LinuxConsoleService:
     # ФУНКЦИИ for Medium level:
 
     def archive(self, format: str, folder: PathLike[str] | str, name: PathLike[str] | str) -> None:
+        """
+        Функция архивации, является универсальной для zip и tar.
+        Обрабатываем каталог указанный. Потом удаляем расширение у желаемого названия архива.
+        И выполняем make_Archive от shutil.
+        """
         base_dir = Path(folder)
         archive_path = Path(name)
 
@@ -168,6 +191,9 @@ class LinuxConsoleService:
             raise OSError(f"Ошибка: {e}")
 
     def unpack_archive(self, format: str, name: PathLike[str] | str) -> None:
+        """
+        Так же универсальная функция. Обрабатываем путь архива.Выполняем unpack_archive от shutil.
+        """
         filename = Path(name)
 
         if not filename.exists():
@@ -185,19 +211,26 @@ class LinuxConsoleService:
             raise OSError(f"Ошибка: {e}")
 
     def grep(self, pattern: str, path: PathLike[str] | str, r: bool, i: bool) -> list[str]:
+        """
+        Обрабатываем путь и паттерн, смотрим на флаг -i.
+        Указан файл: проходимся по нему, индексируя строки, и ищем по регулярке совпадения.
+        Указан каталог и -r: рекурсивный проход обеспечивает os.walk. Если попадется бинарник или еще какая-нибудь фигня - skip.
+        На нормальных файлах такая же обработка, только путь указываем относительно исхдодного каталога.
+        """
         path = Path(path)
         ignore_flag = 0
-        if i: ignore_flag = re.IGNORECASE
+        if i:
+            ignore_flag = re.IGNORECASE
 
         if not path.exists():
             raise FileNotFoundError(f"grep: '{path}': Файл не существует")
 
         try:
             pattern = re.compile(pattern, ignore_flag)
-        except:
+        except Exception:
             raise ValueError("grep: некорректный формат паттерна")
 
-        result = []
+        result: list[str] = []
 
         if path.is_file():
             with open(path, "r", encoding="utf-8", errors="ignore") as f:
