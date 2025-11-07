@@ -1,7 +1,7 @@
 [project]
-name = "labs"
+name = "lab2-shell"
 version = "0.1.0"
-description = "Add your description here"
+description = "Мини-оболочка с командами Linux(ls, cd, cat, cp, mv, rm, zip, unzip, tar, untar, grep, history) и командой отмены операций undo."
 requires-python = ">=3.12"
 dependencies = [
     "pytest>=8.4.2",
